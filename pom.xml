@@ -65,6 +65,7 @@
   <!-- Módulos que componen el proyecto, y el orden en el que
        deben construirse -->
   <modules>
+	  <module>aplicacion/frontend</module>
 	  <module>aplicacion/backend</module>
   </modules>
 

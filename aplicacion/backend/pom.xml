@@ -16,6 +16,12 @@
 	<description>Backend del proyecto</description>
 
 	<dependencies>
+		<!-- Vincular al frontend -->
+		<dependency>
+			<groupId>es.carm.ibarrancos.demo-angular</groupId>
+			<artifactId>frontend</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
