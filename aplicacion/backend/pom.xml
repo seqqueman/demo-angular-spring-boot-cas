@@ -3,27 +3,24 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>es.carm.ibarrancos.demo-angular</groupId>
+		<artifactId>proyecto</artifactId>
+		<version>1.0-SNAPSHOT</version>   
+		<relativePath>../..</relativePath>
 	</parent>
-	<groupId>com.carm.base</groupId>
-	<artifactId>base</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
 
-	<properties>
-		<java.version>1.8</java.version>
-	</properties>
+	<artifactId>backend</artifactId>
+	<packaging>war</packaging>
+
+	<name>backend</name>
+	<description>Backend del proyecto</description>
 
 	<dependencies>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+			<version>${version.spring-boot}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -35,6 +32,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
+			<version>${version.spring-boot}</version>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
@@ -42,28 +40,33 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<version>${version.spring-boot}</version>
 			<scope>test</scope>
 		</dependency>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>${version.spring-boot}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>${version.spring-boot}</version>
 		</dependency>
 		
 		<dependency>
  			<groupId>org.springframework.boot</groupId>
  			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>${version.spring-boot}</version>
 		</dependency>
 		
 		<!-- dependencia base de datos prueba h2 para entorno demo --> 
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>${version.h2database}</version>
 			<scope>runtime</scope>
 		</dependency>
 			
@@ -73,6 +76,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<version>${version.spring-boot}</version>
 			<scope>provided</scope>
 		</dependency>
 		
@@ -81,12 +85,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
+			<version>${version.spring-boot}</version>
 		</dependency>
 		
 		<!-- Needed for SMTP Appender -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+			<version>${version.spring-boot}</version>
 		</dependency>
 		
 		<!-- Needed for Async Logging with Log4j2 -->
@@ -102,28 +108,9 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.6.0</version>
-					<executions>
-						<execution>
-							<phase>validate</phase>
-							<goals>
-								<goal>exec</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>				
-						<executable>ng</executable>
-						<workingDirectory>src/main/resources/frontend/angular-app</workingDirectory>
-						<arguments>
-							<argument>build --prod</argument>
-						</arguments>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${version.spring-boot}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
