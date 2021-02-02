@@ -1,6 +1,5 @@
 
 
-
 # Adecuación de demo.zip
 
 
@@ -9,7 +8,7 @@
 El primer problema que vi en el proyecto fue, que tenía todos los directorio basura de trabajo que en todas las guías y tutoriales recomiendan no subir nunca al repositorio: *```target/ .classpath node_modules ...etc...```. 
 
 
-Así el primer paso consistirá en limpiar el contenido del directorio para evitar que se suban a Git y nos ocupe cantidad de GigaBytes, además de crear un ```.gitignore``` adecuado. Partiendo del fichero ```demo.zip``` que nos pasó Capgemini, ejecutamos los siguientes comandos: 
+Así el primer paso consistirá en limpiar el contenido del directorio para evitar que se suban a Git y nos ocupe cantidad de GigaBytes, además de crear un ```.gitignore``` adecuado. Partiendo del fichero ```demo.zip``` que nos pasó Getronics, ejecutamos los siguientes comandos: 
 
 ```bash
 # Descomprimir...
