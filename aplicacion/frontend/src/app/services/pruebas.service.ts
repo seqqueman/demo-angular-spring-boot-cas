@@ -2,7 +2,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BASE_ENDPOINT } from '../config/app';
-import { map } from 'rxjs/operators';
 import { Prueba } from '../models/prueba';
 
 @Injectable({

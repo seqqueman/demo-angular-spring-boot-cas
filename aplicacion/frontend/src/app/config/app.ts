@@ -1,1 +1,1 @@
-export const BASE_ENDPOINT = 'http://localhost:8080/back';
+export const BASE_ENDPOINT = 'http://localhost:8080/demo-angular/back';

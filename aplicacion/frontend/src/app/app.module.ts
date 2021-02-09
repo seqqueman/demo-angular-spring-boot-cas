@@ -1,12 +1,13 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-
-import { HttpClientModule } from '@angular/common/http';
+import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PrimeraComponent } from './components/primera/primera.component';
 import { SegundaComponent } from './components/segunda/segunda.component';
+import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { LayoutModule } from './layout/layout.module';
+
 
 @NgModule({
   declarations: [
@@ -20,7 +21,13 @@ import { LayoutModule } from './layout/layout.module';
     LayoutModule,
     HttpClientModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [
+    {
+        provide: HTTP_INTERCEPTORS,
+        useClass: ErrorInterceptor,
+        multi: true
+    }
+],
+bootstrap: [AppComponent]
 })
 export class AppModule { }

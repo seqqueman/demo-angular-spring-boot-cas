@@ -149,3 +149,9 @@ features/html-reporter/reports/*.json
 e2e/*.js
 e2e/*.map
 
+*/*.zip
+*__*.*
+*.*__*
+*\public*
+*\old*
+*__*
