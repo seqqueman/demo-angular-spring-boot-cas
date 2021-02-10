@@ -2,56 +2,67 @@ package com.carm.base;
 
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.jasig.cas.client.session.SingleSignOutFilter;
+import org.jasig.cas.client.validation.Cas30ServiceTicketValidator;
+import org.jasig.cas.client.validation.TicketValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
+import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import com.carm.base.security.AppUserDetails;
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	BuildProperties buildProperties;
+	
+
+	@Value("${aplicacion.servidor}")
+	private String servidor;
+	
+	@Value("${pase.login}")
+	private String paseLogin;
+	
+	@Value("${pase.logout}")
+	private String paseLogout;
 
 	private Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
-	private SingleSignOutFilter singleSignOutFilter;
-	private LogoutFilter logoutFilter;
-	private CasAuthenticationProvider casAuthenticationProvider;
-//	private ServiceProperties serviceProperties;
-	private AjaxAwareAuthEntryPointWrapper ajaxAwareAuthEntryPointWrapper;
 
 	@Autowired
-	public WebSecurityConfig(SingleSignOutFilter singleSignOutFilter, LogoutFilter logoutFilter,
-			CasAuthenticationProvider casAuthenticationProvider //, ServiceProperties serviceProperties
-			, AjaxAwareAuthEntryPointWrapper ajaxAwareAuthEntryPointWrapper) {
-		this.logoutFilter = logoutFilter;
-		this.singleSignOutFilter = singleSignOutFilter;
-//		this.serviceProperties = serviceProperties;
-		this.casAuthenticationProvider = casAuthenticationProvider;
-		this.ajaxAwareAuthEntryPointWrapper = ajaxAwareAuthEntryPointWrapper;
-	}
+	private AjaxAwareAuthEntryPointWrapper ajaxAwareAuthEntryPointWrapper;
+	
+//	@Override
+//    public void configure(WebSecurity web) throws Exception {
+//        web.ignoring(). //
+//            antMatchers(HttpMethod.OPTIONS, "/**"). //
+//            antMatchers("/"). //
+//            antMatchers("/*.{js,html}"). //
+//            antMatchers("/img/**"). //
+//            antMatchers("/node_modules/**"). //
+//            antMatchers("/**/*.{js,html,css}");
+//    }
 
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests().antMatchers( "/back/**", "/login").authenticated()
-//          .and()
-//          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
-//          .and()
-//          .addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class)
-//          .addFilterBefore(logoutFilter, LogoutFilter.class)
-//          .csrf().ignoringAntMatchers("/exit/cas");
 		logger.info("dentro security");
-//		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
 		http
 		.csrf().disable()
@@ -63,28 +74,79 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.and()
 		.httpBasic()
 		.authenticationEntryPoint(ajaxAwareAuthEntryPointWrapper);//.authenticationEntryPoint(authenticationEntryPoint());
-
-		http.logout().logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
-			httpServletResponse.addHeader("Set-Cookie",
-					"JSESSIONID=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT");
-			httpServletResponse.addHeader("Set-Cookie",
-					"XSRF-TOKEN=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT");
-			httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-		});
-
-		http.addFilterBefore(this.logoutFilter, LogoutFilter.class);
-		http.addFilterBefore(this.singleSignOutFilter, CasAuthenticationFilter.class);
+		
+		http.addFilterAt(this.casFilter(), CasAuthenticationFilter.class);
+		http.addFilterBefore(this.logoutFilter(), LogoutFilter.class);
+		http.addFilterBefore(this.singleSignOutFilter(), CasAuthenticationFilter.class);
 	}
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(casAuthenticationProvider);
+	
+	@Bean
+    public CasAuthenticationFilter casFilter() throws Exception {
+        CasAuthenticationFilter filter = new CasAuthenticationFilter();
+        filter.setAuthenticationManager(this.authenticationManager());
+        
+        return filter;
+    }
+
+    @Bean
+    public ServiceProperties serviceProperties() {
+        logger.info("service properties");
+        ServiceProperties serviceProperties = new ServiceProperties();
+//        serviceProperties.setService(paseLogin);
+        serviceProperties.setService(servidor+buildProperties.get("applicationName")+"/login/cas");
+        serviceProperties.setSendRenew(false);
+        return serviceProperties;
+    }
+
+    @Bean
+    public TicketValidator ticketValidator() {
+        return new Cas30ServiceTicketValidator(paseLogin);
+    }
+
+    @Bean
+    public CasAuthenticationProvider casAuthenticationProvider() {
+        CasAuthenticationProvider provider = new CasAuthenticationProvider();
+        provider.setServiceProperties(serviceProperties());
+        provider.setTicketValidator(ticketValidator());
+        provider.setUserDetailsService(
+          s -> new AppUserDetails("80069088Q", AuthorityUtils.createAuthorityList("ROLE_USER"), "msg88q", "", false, false, false, true)
+        );
+        provider.setKey("CAS_PROVIDER_LOCALHOST_8900");
+        return provider;
+    }
+
+
+    @Bean
+    public SecurityContextLogoutHandler securityContextLogoutHandler() {
+        return new SecurityContextLogoutHandler();
+    }
+
+	@Bean
+	public LogoutFilter logoutFilter() {
+		LogoutFilter logoutFilter = new LogoutFilter(paseLogout + servidor + buildProperties.get("applicationName"),
+				securityContextLogoutHandler());
+		logoutFilter.setFilterProcessesUrl("/logout/cas");
+		return logoutFilter;
+	}
+
+    @Bean
+    public SingleSignOutFilter singleSignOutFilter() {
+    	return new SingleSignOutFilter();
+    }
+	
+    @Bean
+    public AuthenticationEntryPoint casEntryPoint() {
+		CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+		entryPoint.setLoginUrl(paseLogin);
+		entryPoint.setServiceProperties(serviceProperties());
+		return entryPoint;
 	}
 
 	@Bean
 	@Override
 	protected AuthenticationManager authenticationManager() throws Exception {
-		return new ProviderManager(Collections.singletonList(casAuthenticationProvider));
+		return new ProviderManager(Collections.singletonList(this.casAuthenticationProvider()));
 	}
 
 }
