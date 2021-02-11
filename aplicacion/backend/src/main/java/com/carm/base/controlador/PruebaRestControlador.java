@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.carm.base.modelo.entidad.Prueba;
 import com.carm.base.modelo.servicio.IPruebaServicio;
 
-//@Secured("ROLE_USER")
+@Secured("ROLE_USER")
 //@CrossOrigin(origins = {"http://localhost:4200"})
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @RestController

@@ -25,6 +25,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
+import com.carm.base.security.AppCasAssertionUserDetailsService;
 import com.carm.base.security.AppUserDetails;
 
 @EnableWebSecurity
@@ -63,12 +64,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		logger.info("dentro security");
+		
+//		http
+//		.csrf().disable()
+//		.httpBasic()
+//		.authenticationEntryPoint(ajaxAwareAuthEntryPointWrapper)
+//		.and()
+//		.authorizeRequests()
+//		.antMatchers("/*", "*/**","/login/**").permitAll()
+//		.regexMatchers("/back.*").hasAnyRole("ROLE_USER","ROLE_ADMIN")
+//		;
+		
 
 		http
 		.csrf().disable()
 		.authorizeRequests()
-		.regexMatchers("/back.*")
-		.authenticated()
+		.regexMatchers("/back.*").hasAnyRole("USER","ADMIN")
+//		.authenticated()
 		.anyRequest()
 		.permitAll()
 		.and()
@@ -76,9 +88,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.authenticationEntryPoint(ajaxAwareAuthEntryPointWrapper);//.authenticationEntryPoint(authenticationEntryPoint());
 		
 		http.addFilterAt(this.casFilter(), CasAuthenticationFilter.class);
+
 		http.addFilterBefore(this.logoutFilter(), LogoutFilter.class);
 		http.addFilterBefore(this.singleSignOutFilter(), CasAuthenticationFilter.class);
 	}
+	
+	@Bean
+    public AppCasAssertionUserDetailsService authenticationUserDetailsService() {
+        return new AppCasAssertionUserDetailsService();
+    }
 
 	
 	@Bean
@@ -109,8 +127,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
         provider.setServiceProperties(serviceProperties());
         provider.setTicketValidator(ticketValidator());
-        provider.setUserDetailsService(
-          s -> new AppUserDetails("80069088Q", AuthorityUtils.createAuthorityList("ROLE_USER"), "msg88q", "", false, false, false, true)
+        provider.setAuthenticationUserDetailsService(
+        		this.authenticationUserDetailsService()
+//          s -> new AppUserDetails("80069088Q", AuthorityUtils.createAuthorityList("ROLE_USER"), "msg88q", "", false, false, false, true)
         );
         provider.setKey("CAS_PROVIDER_LOCALHOST_8900");
         return provider;
