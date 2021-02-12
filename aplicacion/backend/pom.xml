@@ -17,7 +17,7 @@
 	<description>Backend del proyecto</description>
 
 	<dependencies>
-<!-- 		Vincular al frontend -->
+		<!-- Vincular al frontend -->
 		<dependency>
 			<groupId>es.carm.ibarrancos.demo-angular</groupId>
 			<artifactId>frontend</artifactId>
@@ -86,7 +86,7 @@
 			<version>${version.spring-boot}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- Add Log4j2 Dependency -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -107,46 +107,52 @@
 			<artifactId>disruptor</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 			<version>${version.spring-boot}</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-cas</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-cas</artifactId>
 			<version>5.4.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<version>${version.spring-boot}</version>
+		</dependency>
+
 
 	</dependencies>
 
 	<build>
 		<finalName>${project.parent.name}</finalName>
-			<plugins>
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${version.spring-boot}</version>
-					<!-- Habilitamos la generacion de un properties con la info
-					de maven accesible desde spring-boot, como el nombre
-					que le queramos dar a la apliacion, para facilitar el desarrollo -->
-					<executions>
-						<execution>
-							<goals>
-								<goal>build-info</goal>
-							</goals>
-							<configuration>
-								<additionalProperties>
-									<applicationName>${project.parent.name}</applicationName>
-								</additionalProperties>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${version.spring-boot}</version>
+				<!-- Habilitamos la generacion de un properties con la info de maven 
+					accesible desde spring-boot, como el nombre que le queramos dar a la apliacion, 
+					para facilitar el desarrollo -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+						<configuration>
+							<additionalProperties>
+								<applicationName>${project.parent.name}</applicationName>
+							</additionalProperties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
-	
+
 </project>

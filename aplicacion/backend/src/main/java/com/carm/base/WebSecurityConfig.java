@@ -2,7 +2,12 @@ package com.carm.base;
 
 import java.util.Collections;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSessionEvent;
+
+//import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.session.SingleSignOutFilter;
+import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.jasig.cas.client.validation.Cas30ServiceTicketValidator;
 import org.jasig.cas.client.validation.TicketValidator;
 import org.slf4j.Logger;
@@ -11,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
@@ -20,13 +26,11 @@ import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.carm.base.security.AppCasAssertionUserDetailsService;
-import com.carm.base.security.AppUserDetails;
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -77,7 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 
 		http
-		.csrf().disable()
+//		.cors().and()
 		.authorizeRequests()
 		.regexMatchers("/back.*").hasAnyRole("USER","ADMIN")
 //		.authenticated()
@@ -85,7 +89,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.permitAll()
 		.and()
 		.httpBasic()
-		.authenticationEntryPoint(ajaxAwareAuthEntryPointWrapper);//.authenticationEntryPoint(authenticationEntryPoint());
+		.authenticationEntryPoint(ajaxAwareAuthEntryPointWrapper);
+		
+		http.csrf().disable();
+		
+		
+		http.
+			logout().
+			logoutSuccessUrl("/").invalidateHttpSession(true)
+		.deleteCookies("JSESSIONID");
+		
+//		http.logout()
+////		.logoutUrl(buildProperties.get("applicationName")+"/logout/cas")
+//		.logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
+//			httpServletResponse.addHeader("Set-Cookie", "JSESSIONID=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT");
+//			httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+//		})
+//		.logoutSuccessUrl("/");
 		
 		http.addFilterAt(this.casFilter(), CasAuthenticationFilter.class);
 
@@ -111,7 +131,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public ServiceProperties serviceProperties() {
         logger.info("service properties");
         ServiceProperties serviceProperties = new ServiceProperties();
-//        serviceProperties.setService(paseLogin);
         serviceProperties.setService(servidor+buildProperties.get("applicationName")+"/login/cas");
         serviceProperties.setSendRenew(false);
         return serviceProperties;
@@ -137,24 +156,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     @Bean
-    public SecurityContextLogoutHandler securityContextLogoutHandler() {
-        return new SecurityContextLogoutHandler();
-    }
-
-	@Bean
-	public LogoutFilter logoutFilter() {
-		LogoutFilter logoutFilter = new LogoutFilter(paseLogout + servidor + buildProperties.get("applicationName"),
-				securityContextLogoutHandler());
-		logoutFilter.setFilterProcessesUrl("/logout/cas");
-		return logoutFilter;
-	}
-
-    @Bean
-    public SingleSignOutFilter singleSignOutFilter() {
-    	return new SingleSignOutFilter();
-    }
-	
-    @Bean
     public AuthenticationEntryPoint casEntryPoint() {
 		CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
 		entryPoint.setLoginUrl(paseLogin);
@@ -166,6 +167,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected AuthenticationManager authenticationManager() throws Exception {
 		return new ProviderManager(Collections.singletonList(this.casAuthenticationProvider()));
+	}
+	
+    
+    @Bean
+    public SingleSignOutFilter singleSignOutFilter() {
+        return new SingleSignOutFilter();
+    }
+    
+    @Bean
+	public SecurityContextLogoutHandler securityContextLogoutHandler() {
+		return new SecurityContextLogoutHandler();
+	}
+	
+	@Bean
+	public LogoutFilter logoutFilter() {
+		String logincas=servidor+buildProperties.get("applicationName")+"/login/cas";
+	    LogoutFilter logoutFilter = new LogoutFilter( paseLogout+"?service="+logincas, this.securityContextLogoutHandler());
+	    logoutFilter.setFilterProcessesUrl("/logout/cas");
+	    return logoutFilter;
+	}
+	
+	@EventListener
+	public SingleSignOutHttpSessionListener singleSignOutHttpSessionListener(HttpSessionEvent event) {
+	    return new SingleSignOutHttpSessionListener();
 	}
 
 }
